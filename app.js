@@ -311,7 +311,7 @@ async function deleteLog(id, moveName, level) {
   showSnackbar('记录已删除');
 }
 
-function exportData() {
+async function exportData() {
   const payload = logs.map((item) => ({
     id: item.id,
     move_id: item.move_id,
@@ -323,13 +323,37 @@ function exportData() {
     created_at_ms: item.created_at
   }));
 
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const content = JSON.stringify(payload, null, 2);
+  const filename = `fitness_backup_${new Date().toISOString().slice(0, 10)}.json`;
+
+  // Mobile-friendly path: Android Chrome often handles file exports better via system share sheet.
+  if (window.isSecureContext && typeof File !== 'undefined' && navigator.share && navigator.canShare) {
+    try {
+      const file = new File([content], filename, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: '健身日志备份' });
+        showSnackbar('已打开系统分享，可保存到文件');
+        return;
+      }
+    } catch (_) {
+      // Ignore and fallback to anchor download.
+    }
+  }
+
+  const blob = new Blob([content], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `fitness_backup_${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+    a.remove();
+  }, 1500);
+
+  showSnackbar('备份文件已导出');
 }
 
 function triggerImportData() {
@@ -342,7 +366,7 @@ async function handleImportFile(event) {
   if (!file) return;
 
   try {
-    const text = await file.text();
+    const text = await readFileAsText(file);
     const payload = JSON.parse(text);
     if (!Array.isArray(payload)) {
       throw new Error('导入失败：JSON 顶层必须是数组');
@@ -369,6 +393,19 @@ async function handleImportFile(event) {
   } finally {
     input.value = '';
   }
+}
+
+function readFileAsText(file) {
+  if (file && typeof file.text === 'function') {
+    return file.text();
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('读取文件失败'));
+    reader.readAsText(file);
+  });
 }
 
 function normalizeImportRow(row) {
