@@ -1,6 +1,6 @@
 {
-  "name": "囚徒健身日志 PWA",
-  "short_name": "健身离线",
+  "name": "囚徒健身日志",
+  "short_name": "囚徒日志",
   "description": "支持离线记录、删除、导入导出的囚徒健身日志应用",
   "start_url": "./index.html",
   "scope": "./",
