@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b57d0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="健身离线">
+  <title>囚徒健身日志 PWA</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>囚徒健身日志</h1>
+      <p>离线版 · Dexie.js</p>
+    </div>
+    <button id="install-btn" class="btn-text-small" hidden>安装 App</button>
+  </header>
+
+  <nav>
+    <button class="tab active" data-tab="log">练习</button>
+    <button class="tab" data-tab="history">历史</button>
+    <button class="tab" data-tab="stats">总览</button>
+  </nav>
+
+  <main>
+    <section id="view-log" class="section active">
+      <div id="move-mount"></div>
+    </section>
+
+    <section id="view-history" class="section">
+      <div id="history-mount"></div>
+    </section>
+
+    <section id="view-stats" class="section">
+      <div class="surface-container" id="stats-mount"></div>
+      <div class="stats-actions">
+        <button class="btn-text-small" id="import-btn">导入 JSON 备份</button>
+        <button class="btn-text-small" id="export-btn">导出 JSON 备份</button>
+      </div>
+      <input id="import-file-input" type="file" accept="application/json,.json" hidden>
+    </section>
+  </main>
+
+  <div id="view-form" class="modal-overlay">
+    <div class="modal-content">
+      <div class="surface-container" id="form-mount"></div>
+    </div>
+  </div>
+
+  <div id="snackbar"></div>
+
+  <template id="tpl-move-card">
+    <button class="move-card" type="button">
+      <div class="card-header">
+        <h3 class="name"></h3>
+        <span class="sub"></span>
+      </div>
+      <p class="meta"></p>
+    </button>
+  </template>
+
+  <template id="tpl-stats-item">
+    <div class="stats-item">
+      <div class="stats-info"><span class="name"></span><span class="val"></span></div>
+      <div class="bar-bg"><div class="bar-fill"></div></div>
+    </div>
+  </template>
+
+  <template id="tpl-history-item">
+    <div class="history-row">
+      <div class="history-meta">
+        <strong class="title"></strong>
+        <small class="time"></small>
+        <div class="note-text"></div>
+      </div>
+      <div class="history-actions">
+        <div class="data"></div>
+        <button class="btn-text-small history-delete" type="button">删除</button>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-cat-title"><div class="cat-title"></div></template>
+
+  <template id="tpl-form">
+    <div class="form-body">
+      <h2 class="form-header"></h2>
+      <label class="input-label">当前阶段</label>
+      <select id="level-select" class="input-field"></select>
+
+      <label class="input-label">记录组数</label>
+      <div class="sets-row">
+        <div id="sets-inputs" class="sets-grid"></div>
+        <button class="btn-add-circle" id="add-set-btn" type="button">+</button>
+      </div>
+
+      <label class="input-label">备注 (可选)</label>
+      <textarea id="note-input" class="input-field" rows="2" placeholder="记录感受或状态..."></textarea>
+
+      <div class="form-actions">
+        <button class="btn-filled" id="save-log-btn" type="button">保存记录</button>
+        <button class="btn-text" id="cancel-form-btn" type="button">取消</button>
+      </div>
+    </div>
+  </template>
+
+  <script src="./vendor/dexie.min.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
