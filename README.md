@@ -1,5 +1,7 @@
 # fitness_pwa
 
+# 基于《囚徒健身1》 和《囚徒健身2》 设计
+
 离线优先的 PWA 版本，数据存储使用 Dexie.js（IndexedDB）。
 
 ## 本地启动
