@@ -54,6 +54,8 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  // 仅缓存 http(s) 请求，忽略 chrome-extension:// 等协议
+  if (!event.request.url.startsWith('http')) return;
   const request = event.request;
 
   if (request.mode === 'navigate') {
