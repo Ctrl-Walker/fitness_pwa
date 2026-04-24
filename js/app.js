@@ -50,7 +50,7 @@ function bindInstallPrompt() {
 async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
   try {
-    await navigator.serviceWorker.register('./sw.js');
+    await navigator.serviceWorker.register('../sw.js');
   } catch (error) {
     showSnackbar('Service Worker 注册失败');
   }
