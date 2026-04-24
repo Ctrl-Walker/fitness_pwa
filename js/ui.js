@@ -163,7 +163,7 @@ async function _saveLog() {
   // 重新渲染当前视图
   const activeTab = document.querySelector('.tab.active').dataset.tab;
   if (activeTab === 'stats') renderStats();
-  if (activeTab === 'history') renderHistory();
+  if (activeTab === 'history') renderHistory(true);
 }
 
 // ---- 统计总览 ----
@@ -206,14 +206,26 @@ export function renderStats() {
 }
 
 // ---- 历史记录 ----
-export function renderHistory() {
+// ---- 历史记录（分页） ----
+const PAGE_SIZE = 20;
+let _displayCount = 0;
+
+export function renderHistory(reset = true) {
+  if (reset) _displayCount = 0;
   const mount = document.getElementById('history-mount');
   const tpl = document.getElementById('tpl-history-item');
-  mount.innerHTML = '';
+  if (reset) mount.innerHTML = '';
 
   const logs = getLogs();
+  const remaining = logs.slice(_displayCount, _displayCount + PAGE_SIZE);
 
-  logs.forEach((log) => {
+  if (!remaining.length && _displayCount === 0) {
+    mount.innerHTML = '<p class="empty-hint">暂无记录</p>';
+    document.getElementById('history-load-more').innerHTML = '';
+    return;
+  }
+
+  remaining.forEach((log) => {
     const clone = tpl.content.cloneNode(true);
     clone.querySelector('.title').innerText = `${log.move_name} · 式 ${log.level}`;
     clone.querySelector('.time').innerText = formatTime(log.created_at);
@@ -225,13 +237,24 @@ export function renderHistory() {
       if (!ok) return;
 
       await deleteLogById(log.id);
-      renderHistory();
+      renderHistory(true);
       renderStats();
       showSnackbar('记录已删除');
     });
 
     mount.appendChild(clone);
   });
+
+  _displayCount += remaining.length;
+
+  // 更新加载更多按钮
+  const loadMoreContainer = document.getElementById('history-load-more');
+  if (_displayCount < logs.length) {
+    loadMoreContainer.innerHTML = '<button class="btn-text-small" id="load-more-btn">加载更多</button>';
+    document.getElementById('load-more-btn').addEventListener('click', () => renderHistory(false));
+  } else {
+    loadMoreContainer.innerHTML = '';
+  }
 }
 
 // ---- 导航切换 ----
@@ -241,7 +264,7 @@ export function bindNav() {
       document.querySelectorAll('.tab, .section').forEach((el) => el.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById(`view-${tab.dataset.tab}`).classList.add('active');
-      if (tab.dataset.tab === 'history') renderHistory();
+      if (tab.dataset.tab === 'history') renderHistory(true);
       if (tab.dataset.tab === 'stats') renderStats();
     });
   });
